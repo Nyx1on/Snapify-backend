@@ -5,6 +5,7 @@ import connectDB from "./database/connect.js";
 import User from "./database/models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -17,6 +18,7 @@ const corsOptions = {
 
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 const port = process.env.PORT || 8000;
 
@@ -37,7 +39,10 @@ app.post("/login", async (req, res) => {
       const checkPass = bcrypt.compareSync(password, user.password);
       if (checkPass) {
         jwt.sign(
-          { email: user.email, id: user._id },
+          {
+            email: user.email,
+            id: user._id,
+          },
           jwtSecret,
           {},
           (err, token) => {
@@ -69,6 +74,18 @@ app.post("/register", async (req, res) => {
     res.json(newUser);
   } catch (e) {
     res.status(422).json({ message: "Error creating user" });
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  const cookies = req.cookies;
+  const token = cookies.token;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+      const { name, email, id } = await User.findById(userData.id);
+      res.json({ name, email, id });
+    });
   }
 });
 
