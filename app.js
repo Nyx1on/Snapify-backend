@@ -42,11 +42,12 @@ app.post("/login", async (req, res) => {
           {},
           (err, token) => {
             if (err) throw err;
-            res.cookie("token", token).json("pass ok");
+            console.log("Successfully logged in");
+            res.cookie("token", token).json(user);
           }
         );
-        res.json("password ok");
       } else {
+        console.log("Password is incorrect");
         res.status(422).json("password not matched");
       }
     } else {
