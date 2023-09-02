@@ -4,6 +4,7 @@ import cors from "cors";
 import connectDB from "./database/connect.js";
 import User from "./database/models/User.js";
 import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 dotenv.config();
 
@@ -20,6 +21,7 @@ app.use(cors(corsOptions));
 const port = process.env.PORT || 8000;
 
 var salt = bcrypt.genSaltSync(10);
+const jwtSecret = process.env.ACCESS_TOKEN;
 
 app.get("/test", (req, res) => {
   res.json("test ok");
@@ -34,6 +36,15 @@ app.post("/login", async (req, res) => {
     if (user) {
       const checkPass = bcrypt.compareSync(password, user.password);
       if (checkPass) {
+        jwt.sign(
+          { email: user.email, id: user._id },
+          jwtSecret,
+          {},
+          (err, token) => {
+            if (err) throw err;
+            res.cookie("token", token).json("pass ok");
+          }
+        );
         res.json("password ok");
       } else {
         res.status(422).json("password not matched");
