@@ -70,7 +70,24 @@ app.post("/register", async (req, res) => {
       name: name,
       email: email,
       password: bcrypt.hashSync(password, salt),
+      type: "User",
     });
+    res.json(newUser);
+  } catch (e) {
+    res.status(422).json({ message: "Error creating user" });
+  }
+});
+
+app.post("/create-admin", async (req, res) => {
+  const { name, email, password } = req.body;
+  try {
+    const newUser = await User.create({
+      name: name,
+      email: email,
+      password: bcrypt.hashSync(password, salt),
+      type: "Admin",
+    });
+    console.log("Admin created", newUser);
     res.json(newUser);
   } catch (e) {
     res.status(422).json({ message: "Error creating user" });
@@ -87,6 +104,11 @@ app.get("/profile", async (req, res) => {
       res.json({ name, email, id });
     });
   }
+});
+
+app.get("/logout", (req, res) => {
+  console.log("Successfully logged out");
+  res.cookie("token", "").json(true);
 });
 
 const startServer = async () => {
