@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 import cors from "cors";
 import connectDB from "./database/connect.js";
 import User from "./database/models/User.js";
+import Album from "./database/models/Album.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
+import multer from "multer";
 
 dotenv.config();
 
@@ -109,6 +111,43 @@ app.get("/profile", async (req, res) => {
 app.get("/logout", (req, res) => {
   console.log("Successfully logged out");
   res.cookie("token", "").json(true);
+});
+
+const imagesMiddleware = multer({ dest: "uploads" });
+
+app.post(
+  "/images/upload",
+  imagesMiddleware.array("photos", 100),
+  (req, res) => {
+    const data = req.files;
+    res.json(" Successfully uploaded");
+  }
+);
+
+app.post("/album/create", (req, res) => {
+  const { token } = req.cookies;
+  const data = req.body.data;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+      const albumDoc = await Album.create({
+        createdBy: userData.id,
+        ...data,
+      });
+      res.json(albumDoc);
+    });
+  }
+});
+
+app.get("/album/get", (req, res) => {
+  const { token } = req.cookies;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+      const albumDoc = await Album.find({ createdBy: userData.id });
+      res.json(albumDoc);
+    });
+  }
 });
 
 const startServer = async () => {

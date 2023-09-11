@@ -1,14 +1,15 @@
 import mongoose, { Schema } from "mongoose";
 
-const ServiceSchema = new Schema({
+const AlbumSchema = new Schema({
   title: String,
   description: String,
   images: [String],
   createdBy: String,
   catagory: String,
-  serviceType: String,
+  genre: String,
+  price: String,
 });
 
-const service = mongoose.model("Service", ServiceSchema);
+const Album = mongoose.model("Album", AlbumSchema);
 
-export default service;
+export default Album;
