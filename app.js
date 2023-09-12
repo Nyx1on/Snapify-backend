@@ -8,6 +8,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import cookieParser from "cookie-parser";
 import multer from "multer";
+import fs from "fs";
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ const corsOptions = {
 };
 
 app.use(express.json());
+app.use("/uploads", express.static("uploads"));
 app.use(cors(corsOptions));
 app.use(cookieParser());
 
@@ -113,14 +115,22 @@ app.get("/logout", (req, res) => {
   res.cookie("token", "").json(true);
 });
 
-const imagesMiddleware = multer({ dest: "uploads" });
+const imagesMiddleware = multer({ dest: "uploads/" });
 
 app.post(
   "/images/upload",
   imagesMiddleware.array("photos", 100),
   (req, res) => {
-    const data = req.files;
-    res.json(" Successfully uploaded");
+    const uploadedFiles = [];
+    for (let i = 0; i < req.files.length; i++) {
+      const { path, originalname } = req.files[i];
+      const parts = originalname.split(".");
+      const ext = parts[parts.length - 1];
+      const newPath = path + "." + ext;
+      fs.renameSync(path, newPath);
+      uploadedFiles.push(newPath.replace("uploads\\", ""));
+    }
+    res.json(uploadedFiles);
   }
 );
 
@@ -139,16 +149,46 @@ app.post("/album/create", (req, res) => {
   }
 });
 
-app.get("/album/get", (req, res) => {
+app.get("/albums/list/get", (req, res) => {
   const { token } = req.cookies;
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
-      const albumDoc = await Album.find({ createdBy: userData.id });
-      res.json(albumDoc);
+      const albumsList = await Album.find({ createdBy: userData.id });
+      res.json(albumsList);
     });
   }
 });
+
+app.get("/album/get/:id", (req, res) => {
+  const { id } = req.params;
+  try {
+    const { token } = req.cookies;
+    if (token) {
+      jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+        if (err) throw err;
+        const albumDoc = await Album.findOne({ _id: id });
+        res.json(albumDoc);
+      });
+    }
+  } catch (e) {
+    res.status(404);
+  }
+});
+
+app.get("/albums/all/get", async (req, res) => {
+  try {
+    const allAlbums = await Album.find();
+    console.log(allAlbums);
+    res.json(allAlbums);
+  } catch (err) {
+    res.status(404);
+  }
+});
+
+app.get("/image2prompt/get", (req, res) => {
+  
+})
 
 const startServer = async () => {
   try {

@@ -5,7 +5,6 @@ const AlbumSchema = new Schema({
   description: String,
   images: [String],
   createdBy: String,
-  catagory: String,
   genre: String,
   price: String,
 });
