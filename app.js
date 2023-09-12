@@ -187,7 +187,7 @@ app.get("/albums/all/get", async (req, res) => {
 });
 
 app.get("/image2prompt/get", (req, res) => {
-  
+
 })
 
 const startServer = async () => {
@@ -196,7 +196,7 @@ const startServer = async () => {
   } catch (error) {
     console.error("Error connecting to MongoDb");
   }
-  app.listen(8000, () => {
+  app.listen(port, () => {
     console.log(`Server listening on port: http://localhost:${port}/`);
   });
 };
