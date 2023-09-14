@@ -137,6 +137,10 @@ app.post(
 app.post("/album/create", (req, res) => {
   const { token } = req.cookies;
   const data = req.body.data;
+  const images = req.body.images;
+
+  data.images = images;
+
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
@@ -186,9 +190,7 @@ app.get("/albums/all/get", async (req, res) => {
   }
 });
 
-app.get("/image2prompt/get", (req, res) => {
-
-})
+app.get("/image2prompt/get", (req, res) => {});
 
 const startServer = async () => {
   try {
