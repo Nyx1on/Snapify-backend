@@ -44,6 +44,7 @@ app.post("/login", async (req, res) => {
       if (checkPass) {
         jwt.sign(
           {
+            userName: user.userName,
             email: user.email,
             id: user._id,
           },
@@ -69,12 +70,13 @@ app.post("/login", async (req, res) => {
 
 app.post("/register", async (req, res) => {
   const userData = req.body.data;
-  const { firstName, lastName, email, password } = userData;
+  const { firstName, lastName, userName, email, password } = userData;
   console.log(userData);
   try {
     const newUser = await User.create({
       firstName: firstName,
       lastName: lastName,
+      userName: userName,
       email: email,
       password: bcrypt.hashSync(password, salt),
       type: "User",
@@ -107,23 +109,22 @@ app.get("/profile", async (req, res) => {
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
-      const { firstName, lastName, email, id, imageURL } = await User.findById(
-        userData.id
-      );
-      res.json({ firstName, lastName, email, id, imageURL });
+      const { firstName, lastName, userName, email, id, imageURL } =
+        await User.findById(userData.id);
+      res.json({ firstName, lastName, userName, email, id, imageURL });
     });
   }
 });
 
-app.get("profile/update", async (req, res) => {
-  const userData = req.body.data;
+app.get("/profile/update", async (req, res) => {
   const cookies = req.cookies;
   const token = cookies.token;
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
+      const updatedUserData = req.body;
 
-      res.json("");
+      //Logic of Update User Data
     });
   }
 });
@@ -156,14 +157,17 @@ app.post("/album/create", (req, res) => {
   const { token } = req.cookies;
   const data = req.body.data;
   const images = req.body.images;
+  const story = req.body.story;
 
   data.images = images;
+  data.story = story;
 
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
       const albumDoc = await Album.create({
-        createdBy: userData.id,
+        userId: userData.id,
+        createdBy: userData.userName,
         ...data,
       });
       res.json(albumDoc);

@@ -4,6 +4,7 @@ const AlbumSchema = new Schema({
   title: String,
   images: [String],
   createdBy: String,
+  userId: String,
   story: String,
   prompt: String,
 });
