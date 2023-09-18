@@ -68,10 +68,13 @@ app.post("/login", async (req, res) => {
 });
 
 app.post("/register", async (req, res) => {
-  const { name, email, password } = req.body;
+  const userData = req.body.data;
+  const { firstName, lastName, email, password } = userData;
+  console.log(userData);
   try {
     const newUser = await User.create({
-      name: name,
+      firstName: firstName,
+      lastName: lastName,
       email: email,
       password: bcrypt.hashSync(password, salt),
       type: "User",
@@ -104,8 +107,23 @@ app.get("/profile", async (req, res) => {
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
-      const { name, email, id } = await User.findById(userData.id);
-      res.json({ name, email, id });
+      const { firstName, lastName, email, id, imageURL } = await User.findById(
+        userData.id
+      );
+      res.json({ firstName, lastName, email, id, imageURL });
+    });
+  }
+});
+
+app.get("profile/update", async (req, res) => {
+  const userData = req.body.data;
+  const cookies = req.cookies;
+  const token = cookies.token;
+  if (token) {
+    jwt.verify(token, jwtSecret, {}, async (err, userData) => {
+      if (err) throw err;
+
+      res.json("");
     });
   }
 });
