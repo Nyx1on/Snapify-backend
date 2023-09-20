@@ -180,7 +180,7 @@ app.get("/albums/list/get", (req, res) => {
   if (token) {
     jwt.verify(token, jwtSecret, {}, async (err, userData) => {
       if (err) throw err;
-      const albumsList = await Album.find({ createdBy: userData.id });
+      const albumsList = await Album.find({ userId: userData.id });
       res.json(albumsList);
     });
   }
