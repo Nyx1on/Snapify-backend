@@ -14,7 +14,7 @@ Ensure you have the following installed on your system:
 1. Clone the repository to your local machine:
 
     ```bash
-    git clone <repository-url>
+    git clone https://github.com/Nyx1on/Snapify-backend.git
     ```
 
 2. Navigate to the project directory:
